@@ -61,10 +61,10 @@ int pifacecad_open(void)
 
     pifacecad_lcd_init();
 
-    return 0;
+    return mcp23s17_fd;
 }
 
-int pifacecad_close(void)
+void pifacecad_close(void)
 {
     // disable interrupts if enabled
     const uint8_t intenb = mcp23s17_read_reg(GPINTENA, hw_addr, mcp23s17_fd);
@@ -73,10 +73,10 @@ int pifacecad_close(void)
         // now do some other interrupt stuff...
         // TODO
     }
-    return close(mcp23s17_fd);
+    close(mcp23s17_fd);
 }
 
-int pifacecad_lcd_init(void)
+void pifacecad_lcd_init(void)
 {
     // setup sequence
     sleep_ns(DELAY_SETUP_0);
@@ -107,8 +107,6 @@ int pifacecad_lcd_init(void)
 
     cur_display_control |= LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON;
     pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
-
-    return 0;
 }
 
 
@@ -136,14 +134,14 @@ int pifacecad_lcd_write(const char * message)
             pifacecad_lcd_set_cursor(0, 1);
         } else {
             pifacecad_lcd_send_data(*message);
-            curcol++;;
+            curcol++;// FIX THIS
         }
         message++;
     }
-    return 0;
+    return colrow2address(curcol, currow);
 }
 
-
+// YOU ARE HERE
 int pifacecad_lcd_set_cursor(int col, int row)
 {
     // if (col == 0 && row == 1) {

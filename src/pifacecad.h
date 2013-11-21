@@ -1,6 +1,21 @@
-/* pifacedigital.h
- * A simple static library for controlling PiFace Digital.
- * See mcp23s17.h for more register definitions.
+/**
+ * @file  pifacecad.h
+ * @brief A simple static library for controlling PiFace Control and Display.
+ *
+ * Copyright (C) 2013 Thomas Preston <thomas.preston@openlx.org.uk>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _PIFACECAD_H
@@ -73,16 +88,85 @@ extern "C" {
 
 static const uint8_t ROW_OFFSETS[2] = {0x00, 0x40};
 
-// main public interface
-int pifacecad_open_noinit(void); // open without initialising
+/**
+ * Opens and initialises a PiFace Control and Display.
+ * Returns a file descriptor for making raw SPI transactions to the
+ * MCP23S17 (for advanced users only).
+ *
+ * Example:
+ *
+ *     pifacecad_open();
+ *     int pifacedigital_fd = pifacecad_open(); // advanced
+ *
+ */
 int pifacecad_open(void);
-int pifacecad_close(void);
 
+/**
+ * Opens a PiFace Control and Display without initialising it.
+ * Returns a file descriptor for making raw SPI transactions to the
+ * MCP23S17 (for advanced users only).
+ *
+ * Example:
+ *
+ *     pifacecad_open_noinit();
+ *     int pifacedigital_fd = pifacecad_open_noinit(); // advanced
+ *
+ */
+int pifacecad_open_noinit(void);
+
+/**
+ * Closes a PiFace Control and Display (turns off interrupts, closes file
+ * descriptor).
+ *
+ * Example:
+ *
+ *     pifacecad_close();
+ *
+ */
+void pifacecad_close(void);
+
+/**
+ * Initialised the LCD. You will not need to call this if you have called
+ * pifacecad_open.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_init();
+ *
+ */
 int pifacecad_lcd_init(void);
 
+/**
+ * Reads the entire switch port.
+ *
+ * Example:
+ *
+ *     uint8_t switch_bits = pifacecad_read_switches();
+ *
+ */
 uint8_t pifacecad_read_switches(void);
+
+/**
+ * Reads a single switch.
+ *
+ * Example (read switch 3):
+ *
+ *     uint8_t switch_value = pifacecad_read_switch(3);
+ *
+ */
 uint8_t pifacecad_read_switch(uint8_t switch_num);
 
+/**
+ * Writes a message to the LCD screen starting from the current cursor
+ * position. Accepts '\n'. Returns the current cursor address.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_write("Hello, World!");
+ *     pifacecad_lcd_write("Moving to a\nnew line is easy");
+ *     int address = pifacecad_lcd_write("Cursor moves after");
+ *
+ */
 int pifacecad_lcd_write(const char * message);
 
 int pifacecad_lcd_set_cursor(int col, int row);

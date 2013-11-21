@@ -9,7 +9,11 @@ Build the library:
 
     $ make
 
-This creates the library `libpifacecad.a`. Include it in your project with:
+This creates the library `libpifacecad.a`. Make the example with:
+
+    $ make example
+
+Include it in your project with:
 
     $ gcc -o example example.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17
 
@@ -22,7 +26,7 @@ Todo
 Feel free to contribute!
 
 - Finish functions
-- Sort out display control stuff
+- Autoscroll
 - mcp23s17_fd checking for each function. Print to stderr if not found.
 - Documentation (Doxygen? Good comments?)
 - Debian install

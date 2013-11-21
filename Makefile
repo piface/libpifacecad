@@ -42,3 +42,9 @@ distclean: clean
 
 clean:
 	rm -f $(OBJECTS)
+
+example: example.c
+	gcc -o example example.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17
+
+test: test.c
+	gcc -o test test.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17

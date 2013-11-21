@@ -12,11 +12,11 @@
 extern "C" {
 #endif
 
-#define DELAY_PULSE_NS 1000 // 10us
-#define DELAY_SETTLE_NS 4000 // 40us
-#define DELAY_SETUP_0 15000000 // 15ms
-#define DELAY_SETUP_1 5000000 // 5ms
-#define DELAY_SETUP_2 1000000 // 1ms
+#define DELAY_PULSE_NS 1000 // 1us
+#define DELAY_SETTLE_NS 40000 // 40us
+#define DELAY_SETUP_0 15000000L // 15ms
+#define DELAY_SETUP_1 5000000L // 5ms
+#define DELAY_SETUP_2 1000000L // 1ms
 
 // mcp23s17 GPIOB to HD44780 pin map
 #define PIN_D4 0
@@ -67,53 +67,53 @@ extern "C" {
 #define LCD_5X10DOTS 0x04
 #define LCD_5X8DOTS 0x00
 
-//[0x00, 0x40, 0x14, 0x54]
-static const uint8_t ROW_OFFSETS[2] = {0x00, 0x40};
-
 #define LCD_MAX_LINES 2
 #define LCD_WIDTH 16
 #define LCD_RAM_WIDTH 80
 
-int pifacecad_open_noinit(); // open without initialising
-int pifacecad_open();
-int pifacecad_close();
+static const uint8_t ROW_OFFSETS[2] = {0x00, 0x40};
 
-int pifacecad_lcd_init();
+// main public interface
+int pifacecad_open_noinit(void); // open without initialising
+int pifacecad_open(void);
+int pifacecad_close(void);
 
-uint8_t pifacecad_read_switches();
+int pifacecad_lcd_init(void);
+
+uint8_t pifacecad_read_switches(void);
 uint8_t pifacecad_read_switch(uint8_t switch_num);
 
 int pifacecad_lcd_write(const char * message);
 
 int pifacecad_lcd_set_cursor(int col, int row);
 int pifacecad_lcd_set_cursor_address(int address);
-int pifacecad_lcd_get_cursor_address();
+int pifacecad_lcd_get_cursor_address(void);
 
-int pifacecad_lcd_clear();
-int pifacecad_lcd_home();
+int pifacecad_lcd_clear(void);
+int pifacecad_lcd_home(void);
 
-int pifacecad_lcd_display_on();
-int pifacecad_lcd_display_off();
-int pifacecad_lcd_blink_on();
-int pifacecad_lcd_blink_off();
-int pifacecad_lcd_cursor_on();
-int pifacecad_lcd_cursor_off();
-int pifacecad_lcd_backlight_on();
-int pifacecad_lcd_backlight_off();
+int pifacecad_lcd_display_on(void);
+int pifacecad_lcd_display_off(void);
+int pifacecad_lcd_blink_on(void);
+int pifacecad_lcd_blink_off(void);
+int pifacecad_lcd_cursor_on(void);
+int pifacecad_lcd_cursor_off(void);
+int pifacecad_lcd_backlight_on(void);
+int pifacecad_lcd_backlight_off(void);
 
-int pifacecad_lcd_move_left();
-int pifacecad_lcd_move_right();
-int pifacecad_lcd_left_justify();
-int pifacecad_lcd_right_justify();
-int pifacecad_lcd_left_to_right();
-int pifacecad_lcd_right_to_left();
+int pifacecad_lcd_move_left(void);
+int pifacecad_lcd_move_right(void);
+int pifacecad_lcd_left_justify(void);
+int pifacecad_lcd_right_justify(void);
+int pifacecad_lcd_left_to_right(void);
+int pifacecad_lcd_right_to_left(void);
+int pifacecad_lcd_autoscroll_on(void);
+int pifacecad_lcd_autoscroll_off(void);
 
-int pifacecad_lcd_set_cgram_address(int address);
-int pifacecad_lcd_set_ddram_address(int address);
-int pifacecad_lcd_update_function_set(uint8_t state);
-int pifacecad_lcd_update_entry_mode(uint8_t state);
-int pifacecad_lcd_update_display_control(uint8_t state);
+int pifacecad_lcd_write_custom_bitmap(uint8_t location);
+int pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[]);
 
+// advanced functions
 int pifacecad_lcd_send_command(uint8_t command);
 int pifacecad_lcd_send_data(uint8_t data);
 int pifacecad_lcd_send_byte(uint8_t byte);
@@ -122,7 +122,7 @@ int pifacecad_lcd_set_rw(uint8_t state);
 int pifacecad_lcd_set_enable(uint8_t state);
 int pifacecad_lcd_set_backlight(uint8_t state);
 
-int pifacecad_lcd_pulse_enable();
+int pifacecad_lcd_pulse_enable(void);
 
 int colrow2address(int col, int row);
 int address2col(int address);

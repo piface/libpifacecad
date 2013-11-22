@@ -29,9 +29,9 @@ extern "C" {
 
 #define DELAY_PULSE_NS 1000 // 1us
 #define DELAY_SETTLE_NS 40000 // 40us
-#define DELAY_SETUP_0 15000000L // 15ms
-#define DELAY_SETUP_1 5000000L // 5ms
-#define DELAY_SETUP_2 1000000L // 1ms
+#define DELAY_SETUP_0_NS 15000000L // 15ms
+#define DELAY_SETUP_1_NS 5000000L // 5ms
+#define DELAY_SETUP_2_NS 1000000L // 1ms
 
 // mcp23s17 GPIOB to HD44780 pin map
 #define PIN_D4 0
@@ -84,7 +84,7 @@ extern "C" {
 
 #define LCD_MAX_LINES 2
 #define LCD_WIDTH 16
-#define LCD_RAM_WIDTH 80
+#define LCD_RAM_WIDTH 40 // RAM is 80 wide, split over two lines
 
 static const uint8_t ROW_OFFSETS[2] = {0x00, 0x40};
 
@@ -134,7 +134,7 @@ void pifacecad_close(void);
  *     pifacecad_lcd_init();
  *
  */
-int pifacecad_lcd_init(void);
+void pifacecad_lcd_init(void);
 
 /**
  * Reads the entire switch port.
@@ -158,59 +158,341 @@ uint8_t pifacecad_read_switch(uint8_t switch_num);
 
 /**
  * Writes a message to the LCD screen starting from the current cursor
- * position. Accepts '\n'. Returns the current cursor address.
+ * position. Accepts '\\n'. Returns the current cursor address.
  *
  * Example:
  *
  *     pifacecad_lcd_write("Hello, World!");
  *     pifacecad_lcd_write("Moving to a\nnew line is easy");
- *     int address = pifacecad_lcd_write("Cursor moves after");
+ *     uint8_t address = pifacecad_lcd_write("Cursor moves after\nwriting");
  *
  */
-int pifacecad_lcd_write(const char * message);
+uint8_t pifacecad_lcd_write(const char * message);
 
-int pifacecad_lcd_set_cursor(int col, int row);
-int pifacecad_lcd_set_cursor_address(int address);
-int pifacecad_lcd_get_cursor_address(void);
+/**
+ * Sets the cursor position on the screen (col , row).
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_set_cursor(5, 1);
+ *
+ */
+uint8_t pifacecad_lcd_set_cursor(uint8_t col, uint8_t row);
 
-int pifacecad_lcd_clear(void);
-int pifacecad_lcd_home(void);
+/**
+ * Sets the cursor position on the screen (address = col + row*40).
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_set_cursor(41); // col=1, row=40
+ *
+ */
+void pifacecad_lcd_set_cursor_address(uint8_t address);
 
-int pifacecad_lcd_display_on(void);
-int pifacecad_lcd_display_off(void);
-int pifacecad_lcd_blink_on(void);
-int pifacecad_lcd_blink_off(void);
-int pifacecad_lcd_cursor_on(void);
-int pifacecad_lcd_cursor_off(void);
-int pifacecad_lcd_backlight_on(void);
-int pifacecad_lcd_backlight_off(void);
+/**
+ * Returns the cursor position (address).
+ *
+ * Example:
+ *
+ *     uint8_t cursor_addr = pifacecad_lcd_get_cursor_address();
+ *
+ */
+uint8_t pifacecad_lcd_get_cursor_address(void);
 
-int pifacecad_lcd_move_left(void);
-int pifacecad_lcd_move_right(void);
-int pifacecad_lcd_left_justify(void);
-int pifacecad_lcd_right_justify(void);
-int pifacecad_lcd_left_to_right(void);
-int pifacecad_lcd_right_to_left(void);
-int pifacecad_lcd_autoscroll_on(void);
-int pifacecad_lcd_autoscroll_off(void);
+/**
+ * Clears the screen and returns the cursor to home (0, 0).
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_clear();
+ *
+ */
+void pifacecad_lcd_clear(void);
 
-int pifacecad_lcd_write_custom_bitmap(uint8_t location);
-int pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[]);
+/**
+ * Returns the cursor to home (0, 0).
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_home();
+ *
+ */
+void pifacecad_lcd_home(void);
 
-// advanced functions
-int pifacecad_lcd_send_command(uint8_t command);
-int pifacecad_lcd_send_data(uint8_t data);
-int pifacecad_lcd_send_byte(uint8_t byte);
-int pifacecad_lcd_set_rs(uint8_t state);
-int pifacecad_lcd_set_rw(uint8_t state);
-int pifacecad_lcd_set_enable(uint8_t state);
-int pifacecad_lcd_set_backlight(uint8_t state);
+/**
+ * Turns the display on.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_on();
+ *
+ */
+void pifacecad_lcd_display_on(void);
 
-int pifacecad_lcd_pulse_enable(void);
+/**
+ * Turns the display off.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_off();
+ *
+ */
+void pifacecad_lcd_display_off(void);
 
-int colrow2address(int col, int row);
-int address2col(int address);
-int address2row(int address);
+/**
+ * Turns the blink on.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_on();
+ *
+ */
+void pifacecad_lcd_blink_on(void);
+
+/**
+ * Turns the blink off.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_off();
+ *
+ */
+void pifacecad_lcd_blink_off(void);
+
+/**
+ * Turns the cursor on.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_on();
+ *
+ */
+void pifacecad_lcd_cursor_on(void);
+
+/**
+ * Turns the cursor off.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_off();
+ *
+ */
+void pifacecad_lcd_cursor_off(void);
+
+/**
+ * Turns the backlight on.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_on();
+ *
+ */
+void pifacecad_lcd_backlight_on(void);
+
+/**
+ * Turns the backlight off.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display_off();
+ *
+ */
+void pifacecad_lcd_backlight_off(void);
+
+/**
+ * Moves the display left.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_move_left();
+ *
+ */
+void pifacecad_lcd_move_left(void);
+
+/**
+ * Moves the display right.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_move_right();
+ *
+ */
+void pifacecad_lcd_move_right(void);
+
+/**
+ * The cursor will move to the right after printing causing text to read
+ * left to right.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_left_to_right();
+ *
+ */
+void pifacecad_lcd_left_to_right(void);
+
+/**
+ * The cursor will move to the left after printing causing text to read
+ * right to left.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_right_to_left();
+ *
+ */
+void pifacecad_lcd_right_to_left(void);
+
+/**
+ * The screen will follow text if it moves out of view.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_autoscroll_on();
+ *
+ */
+void pifacecad_lcd_autoscroll_on(void);
+
+/**
+ * The screen will not follow text if it moves out of view.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_autoscroll_off();
+ *
+ */
+void pifacecad_lcd_autoscroll_off(void);
+
+/**
+ * Writes the custom bitmap stored at the specified bank location to the
+ * display.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_write_custom_bitmap(0);
+ *
+ */
+void pifacecad_lcd_write_custom_bitmap(uint8_t location);
+
+/**
+ * Stores a custom bitmap to the location specified (up to 8: 0-7).
+ *
+ * Example:
+ *
+ *     uint8_t bitmap[] = {0x15, 0xa, 0x15, 0xa, 0x15, 0xa, 0x15, 0xa};
+ *     pifacecad_lcd_store_custom_bitmap(0, bitmap); // store
+ *     pifacecad_lcd_write_custom_bitmap(0); // write
+ *
+ */
+void pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[]);
+
+/**
+ * Send a command to the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_send_command(LCD_CLEARDISPLAY);
+ *
+ */
+void pifacecad_lcd_send_command(uint8_t command);
+
+/**
+ * Send data to the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_send_data('a');
+ *
+ */
+void pifacecad_lcd_send_data(uint8_t data);
+
+/**
+ * Send a byte to the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_send_byte(0xaa);
+ *
+ */
+void pifacecad_lcd_send_byte(uint8_t byte);
+
+/**
+ * Set the RS pin on the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_set_rs(1);
+ *
+ */
+void pifacecad_lcd_set_rs(uint8_t state);
+
+/**
+ * Set the RW pin on the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_set_rw(1);
+ *
+ */
+void pifacecad_lcd_set_rw(uint8_t state);
+
+/**
+ * Set the enable pin on the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_set_enable(1);
+ *
+ */
+void pifacecad_lcd_set_enable(uint8_t state);
+
+/**
+ * Set the backlight pin on the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_set_backlight(1);
+ *
+ */
+void pifacecad_lcd_set_backlight(uint8_t state);
+
+/**
+ * Pulse the enable pin on the HD44780.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_set_backlight(1);
+ *
+ */
+void pifacecad_lcd_pulse_enable(void);
+
+/**
+ * Returns an address calculated from a column and a row.
+ *
+ * Example:
+ *
+ *     uint8_t address = colrow2address(5, 1);
+ *
+ */
+uint8_t colrow2address(uint8_t col, uint8_t row);
+
+/**
+ * Returns a column calculated from an address.
+ *
+ * Example:
+ *
+ *     uint8_t col = address2col(42); // col=2
+ *
+ */
+uint8_t address2col(uint8_t address);
+
+/**
+ * Returns a row calculated from an address.
+ *
+ * Example:
+ *
+ *     uint8_t row = address2col(42); // row=1
+ *
+ */
+uint8_t address2row(uint8_t address);
 
 // int pifacecad_lcd_set_viewport_corner(int col);
 // int pifacecad_lcd_see_cursor(int col);

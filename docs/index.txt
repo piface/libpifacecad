@@ -1,12 +1,12 @@
 /**
-@mainpage libpifacecad - A simple C library for PiFace Control and Display.
+@mainpage
 
 [pifacecad.h](pifacecad_8h.html)
 
 @section links Links
 
 - [piface.org.uk](http://www.piface.org.uk)
-- [piface product source code](http://piface.github.io)
+- [PiFace product source code](http://piface.github.io)
 - [Source code on GitHub](https://github.com/piface/libpifacecad)
 - [libmcp23s17](http://piface.github.io/libmcp23s17)
 
@@ -14,14 +14,17 @@
 
 Download:
 
+    $ git clone https://github.com/piface/libmcp23s17.git
     $ git clone https://github.com/piface/libpifacecad.git
 
 Build the library:
 
-    $ cd libpifacecad/
-    $ make
+    $ cd libmcp23s17/ && make && cd -
+    $ cd libpifacecad/ && make
 
-This creates the library `libpifacecad.a`. Build and run the example:
+This creates the library `libpifacecad.a`.
+
+Build and run the example:
 
     $ make example
     $ ./example
@@ -38,7 +41,18 @@ Include the library in your project with:
 
 Feel free to contribute!
 
+- Command line controller
+
+    write
+    backlight
+    blink
+    cursor
+    display
+    home
+    clear
+
+- LCDProc driver
 - Debian install
-- Interrupts (using epoll?)
+- Interrupts (using libmcp23s17 interrupts?)
 
 */

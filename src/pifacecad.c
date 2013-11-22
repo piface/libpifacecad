@@ -14,7 +14,8 @@ static const int SWITCH_PORT = GPIOA;
 static const int LCD_PORT = GPIOB;
 
 // current lcd state
-static int curcol = 0, currow = 0;
+// static int curcol = 0, currow = 0;
+static uint8_t cur_address = 0;
 static uint8_t cur_entry_mode = 0;
 static uint8_t cur_function_set = 0;
 static uint8_t cur_display_control = 0;
@@ -79,15 +80,15 @@ void pifacecad_close(void)
 void pifacecad_lcd_init(void)
 {
     // setup sequence
-    sleep_ns(DELAY_SETUP_0);
+    sleep_ns(DELAY_SETUP_0_NS);
     mcp23s17_write_reg(0x3, LCD_PORT, hw_addr, mcp23s17_fd);
     pifacecad_lcd_pulse_enable();
 
-    sleep_ns(DELAY_SETUP_1);
+    sleep_ns(DELAY_SETUP_1_NS);
     mcp23s17_write_reg(0x3, LCD_PORT, hw_addr, mcp23s17_fd);
     pifacecad_lcd_pulse_enable();
 
-    sleep_ns(DELAY_SETUP_2);
+    sleep_ns(DELAY_SETUP_2_NS);
     mcp23s17_write_reg(0x3, LCD_PORT, hw_addr, mcp23s17_fd);
     pifacecad_lcd_pulse_enable();
 
@@ -123,10 +124,9 @@ uint8_t pifacecad_read_switch(uint8_t switch_num)
 }
 
 
-int pifacecad_lcd_write(const char * message)
+uint8_t pifacecad_lcd_write(const char * message)
 {
-    pifacecad_lcd_send_command(
-        LCD_SETDDRAMADDR | colrow2address(curcol, currow));
+    pifacecad_lcd_send_command(LCD_SETDDRAMADDR | cur_address);
 
     // for each character in the message
     while (*message) {
@@ -134,15 +134,14 @@ int pifacecad_lcd_write(const char * message)
             pifacecad_lcd_set_cursor(0, 1);
         } else {
             pifacecad_lcd_send_data(*message);
-            curcol++;// FIX THIS
+            cur_address++;
         }
         message++;
     }
-    return colrow2address(curcol, currow);
+    return cur_address;
 }
 
-// YOU ARE HERE
-int pifacecad_lcd_set_cursor(int col, int row)
+uint8_t pifacecad_lcd_set_cursor(uint8_t col, uint8_t row)
 {
     // if (col == 0 && row == 1) {
     //     pifacecad_lcd_send_command(LCD_NEWLINE);
@@ -155,143 +154,129 @@ int pifacecad_lcd_set_cursor(int col, int row)
     // currow = row;
     col = max(0, min(col, LCD_RAM_WIDTH - 1));
     row = max(0, min(row, LCD_MAX_LINES - 1));
-    return pifacecad_lcd_set_cursor_address(colrow2address(col, row));
+    pifacecad_lcd_set_cursor_address(colrow2address(col, row));
+    return cur_address;
 }
 
-int pifacecad_lcd_set_cursor_address(int address)
+void pifacecad_lcd_set_cursor_address(uint8_t address)
 {
-    pifacecad_lcd_send_command(LCD_SETDDRAMADDR | address);
-    curcol = address2col(address);
-    currow = address2row(address);
-    return 0;
+    cur_address = address % LCD_RAM_WIDTH;
+    pifacecad_lcd_send_command(LCD_SETDDRAMADDR | cur_address);
 }
 
-int pifacecad_lcd_get_cursor_address(void)
+uint8_t pifacecad_lcd_get_cursor_address(void)
 {
-    return colrow2address(curcol, currow);
+    return cur_address;
 }
 
 
-int pifacecad_lcd_clear(void)
+void pifacecad_lcd_clear(void)
 {
     pifacecad_lcd_send_command(LCD_CLEARDISPLAY);
-    curcol = 0;
-    currow = 0;
-    return 0;
+    cur_address = 0;
 }
 
-int pifacecad_lcd_home(void)
+void pifacecad_lcd_home(void)
 {
     pifacecad_lcd_send_command(LCD_RETURNHOME);
-    curcol = 0;
-    currow = 0;
-    return 0;
+    cur_address = 0;
 }
 
 
-int pifacecad_lcd_display_on(void)
+void pifacecad_lcd_display_on(void)
 {
     cur_display_control |= LCD_DISPLAYON;
-    return pifacecad_lcd_send_command(
-        LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
 }
 
-int pifacecad_lcd_display_off(void)
+void pifacecad_lcd_display_off(void)
 {
     cur_display_control &= 0xff ^ LCD_DISPLAYON;
-    return pifacecad_lcd_send_command(
-        LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
 }
 
-int pifacecad_lcd_blink_on(void)
+void pifacecad_lcd_blink_on(void)
 {
     cur_display_control |= LCD_BLINKON;
-    return pifacecad_lcd_send_command(
-        LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
 }
 
-int pifacecad_lcd_blink_off(void)
+void pifacecad_lcd_blink_off(void)
 {
     cur_display_control &= 0xff ^ LCD_BLINKON;
-    return pifacecad_lcd_send_command(
-        LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
 }
 
-int pifacecad_lcd_cursor_on(void)
+void pifacecad_lcd_cursor_on(void)
 {
     cur_display_control |= LCD_CURSORON;
-    return pifacecad_lcd_send_command(
-        LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
 }
 
-int pifacecad_lcd_cursor_off(void)
+void pifacecad_lcd_cursor_off(void)
 {
     cur_display_control &= 0xff ^ LCD_CURSORON;
-    return pifacecad_lcd_send_command(
-        LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
 }
 
-int pifacecad_lcd_backlight_on(void)
+void pifacecad_lcd_backlight_on(void)
 {
-    return pifacecad_lcd_set_backlight(1);
+    pifacecad_lcd_set_backlight(1);
 }
 
-int pifacecad_lcd_backlight_off(void)
+void pifacecad_lcd_backlight_off(void)
 {
-    return pifacecad_lcd_set_backlight(0);
+    pifacecad_lcd_set_backlight(0);
 }
 
-
-int pifacecad_lcd_move_left(void)
+void pifacecad_lcd_move_left(void)
 {
-    return pifacecad_lcd_send_command(LCD_CURSORSHIFT | \
-                                      LCD_DISPLAYMOVE | \
-                                      LCD_MOVELEFT);
+    pifacecad_lcd_send_command(LCD_CURSORSHIFT | \
+                               LCD_DISPLAYMOVE | \
+                               LCD_MOVELEFT);
 }
 
-int pifacecad_lcd_move_right(void)
+void pifacecad_lcd_move_right(void)
 {
-    return pifacecad_lcd_send_command(LCD_CURSORSHIFT | \
-                                      LCD_DISPLAYMOVE | \
-                                      LCD_MOVERIGHT);
+    pifacecad_lcd_send_command(LCD_CURSORSHIFT | \
+                               LCD_DISPLAYMOVE | \
+                               LCD_MOVERIGHT);
 }
 
-int pifacecad_lcd_left_to_right(void)
+void pifacecad_lcd_left_to_right(void)
 {
     cur_entry_mode |= LCD_ENTRYLEFT;
-    return pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
 }
 
-int pifacecad_lcd_right_to_left(void)
+void pifacecad_lcd_right_to_left(void)
 {
     cur_entry_mode &= 0xff ^ LCD_ENTRYLEFT;
-    return pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
 }
 
 // This will 'right justify' text from the cursor
-int pifacecad_lcd_autoscroll_on(void)
+void pifacecad_lcd_autoscroll_on(void)
 {
     cur_display_control |= LCD_ENTRYSHIFTINCREMENT;
-    return pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_display_control);
+    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_display_control);
 }
 
 // This will 'left justify' text from the cursor
-int pifacecad_lcd_autoscroll_off(void)
+void pifacecad_lcd_autoscroll_off(void)
 {
     cur_display_control &= 0xff ^ LCD_ENTRYSHIFTINCREMENT;
-    return pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_display_control);
+    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_display_control);
 }
 
-int pifacecad_lcd_write_custom_bitmap(uint8_t location)
+void pifacecad_lcd_write_custom_bitmap(uint8_t location)
 {
-    pifacecad_lcd_send_command(
-        LCD_SETDDRAMADDR | colrow2address(curcol, currow));
+    pifacecad_lcd_send_command(LCD_SETDDRAMADDR | cur_address);
     pifacecad_lcd_send_data(location);
-    curcol++;
-    return 0;
+    cur_address++;
 }
 
-int pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[])
+void pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
     pifacecad_lcd_send_command(LCD_SETCGRAMADDR | (location << 3));
@@ -299,26 +284,23 @@ int pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[])
     for (i = 0; i < 8; i++) {
         pifacecad_lcd_send_data(bitmap[i]);
     }
-    return 0;
 }
 
-int pifacecad_lcd_send_command(uint8_t command)
+void pifacecad_lcd_send_command(uint8_t command)
 {
     pifacecad_lcd_set_rs(0);
     pifacecad_lcd_send_byte(command);
     sleep_ns(DELAY_SETTLE_NS);
-    return 0;
 }
 
-int pifacecad_lcd_send_data(uint8_t data)
+void pifacecad_lcd_send_data(uint8_t data)
 {
     pifacecad_lcd_set_rs(1);
     pifacecad_lcd_send_byte(data);
     sleep_ns(DELAY_SETTLE_NS);
-    return 0;
 }
 
-int pifacecad_lcd_send_byte(uint8_t b)
+void pifacecad_lcd_send_byte(uint8_t b)
 {
     // get current lcd port state and clear the data bits
     uint8_t current_state = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
@@ -333,54 +315,48 @@ int pifacecad_lcd_send_byte(uint8_t b)
     new_byte = current_state | (b & 0xF);  // set nibble
     mcp23s17_write_reg(new_byte, LCD_PORT, hw_addr, mcp23s17_fd);
     pifacecad_lcd_pulse_enable();
-    return 0;
 }
 
-int pifacecad_lcd_set_rs(uint8_t state)
+void pifacecad_lcd_set_rs(uint8_t state)
 {
     mcp23s17_write_bit(state, PIN_RS, LCD_PORT, hw_addr, mcp23s17_fd);
-    return 0;
 }
 
-int pifacecad_lcd_set_rw(uint8_t state)
+void pifacecad_lcd_set_rw(uint8_t state)
 {
     mcp23s17_write_bit(state, PIN_RW, LCD_PORT, hw_addr, mcp23s17_fd);
-    return 0;
 }
 
-int pifacecad_lcd_set_enable(uint8_t state)
+void pifacecad_lcd_set_enable(uint8_t state)
 {
     mcp23s17_write_bit(state, PIN_ENABLE, LCD_PORT, hw_addr, mcp23s17_fd);
-    return 0;
 }
 
-int pifacecad_lcd_set_backlight(uint8_t state)
+void pifacecad_lcd_set_backlight(uint8_t state)
 {
     mcp23s17_write_bit(state, PIN_BACKLIGHT, LCD_PORT, hw_addr, mcp23s17_fd);
-    return 0;
 }
 
 /* pulse the enable pin */
-int pifacecad_lcd_pulse_enable(void)
+void pifacecad_lcd_pulse_enable(void)
 {
     pifacecad_lcd_set_enable(1);
     sleep_ns(DELAY_PULSE_NS);
     pifacecad_lcd_set_enable(0);
     sleep_ns(DELAY_PULSE_NS);
-    return 0;
 }
 
-int colrow2address(int col, int row)
+uint8_t colrow2address(uint8_t col, uint8_t row)
 {
     return col + ROW_OFFSETS[row];
 }
 
-int address2col(int address)
+uint8_t address2col(uint8_t address)
 {
     return address % ROW_OFFSETS[1];
 }
 
-int address2row(int address)
+uint8_t address2row(uint8_t address)
 {
     return address > ROW_OFFSETS[1] ? 1 : 0;
 }

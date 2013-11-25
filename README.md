@@ -6,7 +6,7 @@ for example usage.
 Documentation
 -------------
 
-[http://piface.github.io/piface/libpifacecad](http://piface.github.io/piface/libpifacecad)
+[http://piface.github.io/libpifacecad](http://piface.github.io/libpifacecad)
 
 Build the docs with:
 

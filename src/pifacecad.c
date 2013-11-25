@@ -143,16 +143,7 @@ uint8_t pifacecad_lcd_write(const char * message)
 
 uint8_t pifacecad_lcd_set_cursor(uint8_t col, uint8_t row)
 {
-    // if (col == 0 && row == 1) {
-    //     pifacecad_lcd_send_command(LCD_NEWLINE);
-    // } else {
-    //     col = max(0, min(col, LCD_RAM_WIDTH - 1));
-    //     row = max(0, min(row, LCD_MAX_LINES - 1));
-    //     pfcad_set_ddram_address(colrow2address(col, row));
-    // }
-    // curcol = col;
-    // currow = row;
-    col = max(0, min(col, LCD_RAM_WIDTH - 1));
+    col = max(0, min(col, (LCD_RAM_WIDTH / 2) - 1));
     row = max(0, min(row, LCD_MAX_LINES - 1));
     pifacecad_lcd_set_cursor_address(colrow2address(col, row));
     return cur_address;

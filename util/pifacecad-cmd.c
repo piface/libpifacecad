@@ -30,7 +30,21 @@ const char *argp_program_version = "pifacecad v0.1.0";
 const char *argp_program_bug_address = "<thomas.preston@openlx.org.uk>";
 
 /* Program documentation. */
-static char doc[] = "Command line tool for PiFace Control and Display.";
+static char doc[] = "Command line tool for PiFace Control and Display.\n\n"
+"Commands:\n\n"
+"    open                     Set up the board (opt args: displayoff,\n"
+"                             cursoroff, blinkoff)\n"
+"    read                     Reads from a port (args: switch, switches)\n"
+"    write                    Writes to the LCD.\n"
+"    backlight on             Backlight 'on' or 'off'.\n"
+"    home                     Set the cursor to the home position.\n"
+"    clear                    Clear the screen.\n"
+"    cursor                   Sets the cursor to the COL and ROW specified.\n\n"
+"Example:\n\n"
+"    $ pifacecad open blinkoff\n"
+"    $ pifacecad write \"Hello, world!\"\n"
+"    $ pifacecad backlight on\n"
+"    $ pifacecad setcursor 7 1\n";
 
 /* A description of the arguments we accept. */
 static char args_doc[] = "CMD CMDARG0 CMDARG1 CMDARG2";
@@ -160,6 +174,11 @@ int main(int argc, char **argv)
 
     } else if (strcmp(arguments.cmd, "clear") == 0) {
         pifacecad_lcd_clear();
+
+    } else if (strcmp(arguments.cmd, "setcursor") == 0) {
+        const uint8_t col = atoi(arguments.cmdargs[0]);
+        const uint8_t row = atoi(arguments.cmdargs[1]);
+        pifacecad_lcd_set_cursor(col, row);
     }
 
     pifacecad_close();
@@ -177,6 +196,7 @@ uint8_t str2reg(char * reg_str)
 
     // get the real value (TODO add some more registers here)
     if (strcmp(reg_str, "switch") == 0 || \
+            strcmp(reg_str, "switches") == 0 || \
             strcmp(reg_str, "input") == 0 || \
             strcmp(reg_str, "gpioa") == 0) {
         return GPIOA;

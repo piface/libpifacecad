@@ -84,9 +84,9 @@ extern "C" {
 
 #define LCD_MAX_LINES 2
 #define LCD_WIDTH 16
-#define LCD_RAM_WIDTH 40 // RAM is 80 wide, split over two lines
+#define LCD_RAM_WIDTH 80 // RAM is 80 wide, split over two lines
 
-static const uint8_t ROW_OFFSETS[2] = {0x00, 0x40};
+static const uint8_t ROW_OFFSETS[] = {0, 0x40};
 
 /**
  * Opens and initialises a PiFace Control and Display.

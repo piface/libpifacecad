@@ -24,10 +24,22 @@ Build the library:
 
 This creates the library `libpifacecad.a`.
 
-Build and run the example:
+Build and run the example and the pifacecad utility for command line control:
 
     $ make example
     $ ./example
+
+    $ make pifacecad
+    $ ./pifacecad open
+    $ ./pifacecad open blinkoff cursoroff
+    $ ./pifacecad read switches # read switch port
+    $ ./pifacecad -b2 read switch # read switch 2 (0-7)
+    $ ./pifacecad write "Hello world" # write to the screen
+    $ ./pifacecad backlight on # backlight 'on' or 'off'
+    $ ./pifacecad setcursor 5 1
+    $ ./pifacecad home
+    $ ./pifacecad clear
+    $ ./pifacecad --help
 
 Include the library in your project with:
 
@@ -40,16 +52,6 @@ Include the library in your project with:
 @section todo Todo
 
 Feel free to contribute!
-
-- Command line controller
-
-    write
-    backlight
-    blink
-    cursor
-    display
-    home
-    clear
 
 - LCDProc driver
 - Debian install

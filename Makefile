@@ -46,5 +46,8 @@ clean:
 example: example.c
 	gcc -o example example.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17
 
+pifacecad: util/pifacecad-cmd.c
+	gcc -o pifacecad util/pifacecad-cmd.c -Isrc/ -I../libmcp23s17/src/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17
+
 test: test.c
 	gcc -o test test.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17

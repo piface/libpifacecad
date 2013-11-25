@@ -95,20 +95,27 @@ $ git clone https://github.com/piface/libpifacecad.git
 <pre class="fragment">$ cd libmcp23s17/ &amp;&amp; make &amp;&amp; cd -
 $ cd libpifacecad/ &amp;&amp; make
 </pre><p>This creates the library <code>libpifacecad.a</code>.</p>
-<p>Build and run the example: </p>
+<p>Build and run the example and the pifacecad utility for command line control: </p>
 <pre class="fragment">$ make example
 $ ./example
+
+$ make pifacecad
+$ ./pifacecad open
+$ ./pifacecad open blinkoff cursoroff
+$ ./pifacecad read switches # read switch port
+$ ./pifacecad -b2 read switch # read switch 2 (0-7)
+$ ./pifacecad write "Hello world" # write to the screen
+$ ./pifacecad backlight on # backlight 'on' or 'off'
+$ ./pifacecad setcursor 5 1
+$ ./pifacecad home
+$ ./pifacecad clear
+$ ./pifacecad --help
 </pre><p>Include the library in your project with: </p>
 <pre class="fragment">$ gcc -o example example.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17
 </pre><p><code>-I</code> directories to search for header files. <code>-L</code> directories to search for libraries. <code>-l</code> libraries to link.</p>
 <h1><a class="anchor" id="todo"></a>
 Todo</h1>
 <p>Feel free to contribute!</p>
-<ul>
-<li><p class="startli">Command line controller</p>
-<p class="startli">write backlight blink cursor display home clear</p>
-</li>
-</ul>
 <ul>
 <li>LCDProc driver</li>
 <li>Debian install</li>
@@ -117,7 +124,7 @@ Todo</h1>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 22 2013 10:08:42 for libpifacecad by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Nov 25 2013 12:46:29 for libpifacecad by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1.2
 </small></address>

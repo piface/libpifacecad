@@ -25,6 +25,7 @@ static uint8_t cur_display_control = 0;
 static void sleep_ns(long nanoseconds);
 static int max(int a, int b);
 static int min(int a, int b);
+static uint8_t is_busy(void);
 
 
 int pifacecad_open_noinit(void)
@@ -374,19 +375,45 @@ static int min(int a, int b)
 
 static uint8_t is_busy(void)
 {
-    // set RS=0, RW=1
+    // printf("checking busy\n");
 
+    // set data lines as inputs
+    mcp23s17_write_reg(0x0f, IODIRB, hw_addr, mcp23s17_fd);
+
+    // set RS=0, RW=1
     // 2 read, 2 write
-    // pifacecad_lcd_set_rs(0);
-    // pifacecad_lcd_set_rw(1);
+    pifacecad_lcd_set_rs(0);  // instruction register
+    pifacecad_lcd_set_rw(1);  // read
 
     // 1 read, 1 write - this is faster
-    uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
-    reg &= 0xff ^ (1 << PIN_RS);  // clear RS
-    reg |= 1 << PIN_RW;  // set RW
-    mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
+    // could do without read if I stored the backlight state locally
+    // which is probably the right way of doing things
+    // uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
+    // reg &= 0xff ^ (1 << PIN_RS);  // clear RS
+    // reg |= 1 << PIN_RW;  // set RW
+    // reg |= 1 << PIN_ENABLE;  // set ENABLE
+    // reg &= 0xf0;  // clear data
+    // mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
+
+    pifacecad_lcd_set_enable(1);
+    sleep_ns(DELAY_PULSE_NS);
 
     // read busy
-    reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
+    uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
+    // printf("0x%X\n", reg);
+
+    pifacecad_lcd_set_enable(0);
+    sleep_ns(DELAY_PULSE_NS);
+
+    // lower nibble of address counter
+    pifacecad_lcd_set_enable(1);
+    sleep_ns(DELAY_PULSE_NS);
+    pifacecad_lcd_set_enable(0);
+    sleep_ns(DELAY_PULSE_NS);
+
+    pifacecad_lcd_set_rw(0);
+
+    mcp23s17_write_reg(0x00, IODIRB, hw_addr, mcp23s17_fd);
+
     return reg & 0x01;  // return the busy flag
 }

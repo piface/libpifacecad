@@ -279,6 +279,7 @@ void pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[])
 
 void pifacecad_lcd_send_command(uint8_t command)
 {
+    while(is_busy());  // wait until not busy
     pifacecad_lcd_set_rs(0);
     pifacecad_lcd_send_byte(command);
     sleep_ns(DELAY_SETTLE_NS);
@@ -286,6 +287,7 @@ void pifacecad_lcd_send_command(uint8_t command)
 
 void pifacecad_lcd_send_data(uint8_t data)
 {
+    while(is_busy());  // wait until not busy
     pifacecad_lcd_set_rs(1);
     pifacecad_lcd_send_byte(data);
     sleep_ns(DELAY_SETTLE_NS);
@@ -368,4 +370,23 @@ static int max(int a, int b)
 static int min(int a, int b)
 {
     return a < b ? a : b;
+}
+
+static uint8_t is_busy(void)
+{
+    // set RS=0, RW=1
+
+    // 2 read, 2 write
+    // pifacecad_lcd_set_rs(0);
+    // pifacecad_lcd_set_rw(1);
+
+    // 1 read, 1 write - this is faster
+    uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
+    reg &= 0xff ^ (1 << PIN_RS);  // clear RS
+    reg |= 1 << PIN_RW;  // set RW
+    mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
+
+    // read busy
+    reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
+    return reg & 0x01;  // return the busy flag
 }

@@ -51,3 +51,6 @@ pifacecad: util/pifacecad-cmd.c
 
 test: test.c
 	gcc -o test test.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17
+
+test_busy: test_busy.c
+	gcc -o test_busy test_busy.c -Isrc/ -L. -lpifacecad -L../libmcp23s17/ -lmcp23s17

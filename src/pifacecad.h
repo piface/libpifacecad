@@ -18,6 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// https://www.sparkfun.com/datasheets/LCD/HD44780.pdf
+
 #ifndef _PIFACECAD_H
 #define _PIFACECAD_H
 

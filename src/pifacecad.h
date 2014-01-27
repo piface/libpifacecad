@@ -397,7 +397,7 @@ void pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[]);
 void pifacecad_lcd_send_command(uint8_t command);
 
 /**
- * Send data to the HD44780.
+ * Send data to the HD44780 (waits until busy flag is clear).
  *
  * Example:
  *
@@ -407,7 +407,7 @@ void pifacecad_lcd_send_command(uint8_t command);
 void pifacecad_lcd_send_data(uint8_t data);
 
 /**
- * Send a byte to the HD44780.
+ * Send a byte to the HD44780 (waits until busy flag is clear).
  *
  * Example:
  *
@@ -417,7 +417,7 @@ void pifacecad_lcd_send_data(uint8_t data);
 void pifacecad_lcd_send_byte(uint8_t byte);
 
 /**
- * Set the RS pin on the HD44780.
+ * Set the RS pin on the HD44780 (does not wait until busy flag is clear).
  *
  * Example:
  *

@@ -14,7 +14,7 @@ void wait_for_enter(const char * message)
 int main(void)
 {
     printf("Starting\n");
-    pifacecad_open();
+    pifacecad_open_init();
 
     pifacecad_lcd_clear();
     pifacecad_lcd_backlight_on();
@@ -23,7 +23,6 @@ int main(void)
 
     while (1) {
         pifacecad_lcd_clear();
-        // printf("Printing.\n");
         pifacecad_lcd_write("CHECKING BUSY\nCHECKING BUSY");
     }
 

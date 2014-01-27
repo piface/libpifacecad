@@ -96,19 +96,35 @@ void pifacecad_lcd_init(void)
     mcp23s17_write_reg(0x2, LCD_PORT, hw_addr, mcp23s17_fd);
     pifacecad_lcd_pulse_enable();
 
+    /* don't use the `pifacecad_lcd_send_command` function for the rest
+     * because we wan't to ignore the busy flag during initialisation so
+     * that we can recover from a dirty exit (eg. Ctrl-C).
+     */
+    pifacecad_lcd_set_rs(0);
+
     cur_function_set |= LCD_4BITMODE | LCD_2LINE | LCD_5X8DOTS;
-    pifacecad_lcd_send_command(LCD_FUNCTIONSET | cur_function_set);
+    // pifacecad_lcd_send_command(LCD_FUNCTIONSET | cur_function_set);
+    pifacecad_lcd_send_byte(LCD_FUNCTIONSET | cur_function_set);
+    sleep_ns(DELAY_SETTLE_NS);
 
     cur_display_control |= LCD_DISPLAYOFF | LCD_CURSOROFF | LCD_BLINKOFF;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    // pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_byte(LCD_DISPLAYCONTROL | cur_display_control);
+    sleep_ns(DELAY_SETTLE_NS);
 
-    pifacecad_lcd_clear();
+    // pifacecad_lcd_clear();
+    pifacecad_lcd_send_byte(LCD_CLEARDISPLAY);
+    sleep_ns(DELAY_SETTLE_NS);
 
     cur_entry_mode |= LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
-    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    // pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    pifacecad_lcd_send_byte(LCD_ENTRYMODESET | cur_entry_mode);
+    sleep_ns(DELAY_SETTLE_NS);
 
     cur_display_control |= LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    // pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_send_byte(LCD_DISPLAYCONTROL | cur_display_control);
+    sleep_ns(DELAY_SETTLE_NS);
 }
 
 
@@ -375,8 +391,6 @@ static int min(int a, int b)
 
 static uint8_t is_busy(void)
 {
-    // printf("checking busy\n");
-
     // set data lines as inputs
     mcp23s17_write_reg(0x0f, IODIRB, hw_addr, mcp23s17_fd);
 
@@ -391,16 +405,15 @@ static uint8_t is_busy(void)
     // uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
     // reg &= 0xff ^ (1 << PIN_RS);  // clear RS
     // reg |= 1 << PIN_RW;  // set RW
-    // reg |= 1 << PIN_ENABLE;  // set ENABLE
+    // // reg |= 1 << PIN_ENABLE;  // set ENABLE
     // reg &= 0xf0;  // clear data
     // mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
 
     pifacecad_lcd_set_enable(1);
     sleep_ns(DELAY_PULSE_NS);
 
-    // read busy
+    // read busy and three most significant bits of address counter
     uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
-    // printf("0x%X\n", reg);
 
     pifacecad_lcd_set_enable(0);
     sleep_ns(DELAY_PULSE_NS);
@@ -412,6 +425,8 @@ static uint8_t is_busy(void)
     sleep_ns(DELAY_PULSE_NS);
 
     pifacecad_lcd_set_rw(0);
+    // reg &= 0xff ^ (1 << PIN_RW);  // clear RW
+    // mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
 
     mcp23s17_write_reg(0x00, IODIRB, hw_addr, mcp23s17_fd);
 

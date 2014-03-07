@@ -55,6 +55,5 @@ Feel free to contribute!
 
 - LCDProc driver
 - Debian install
-- Interrupts (using libmcp23s17 interrupts?)
 
 */

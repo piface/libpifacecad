@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v0.2.0
+------
+- Now with interrupts.
+- Fixed garbled text bug (added busy check).
+
 v0.1.0
 ------
 - Initial release.

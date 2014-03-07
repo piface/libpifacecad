@@ -159,6 +159,47 @@ uint8_t pifacecad_read_switches(void);
 uint8_t pifacecad_read_switch(uint8_t switch_num);
 
 /**
+ * Enables interrupts and exports to the GPIO connection from
+ * the PiFace Control and Display.
+ *
+ * Example:
+ *    pifacecad_enable_interrupts();
+ *
+ * @return int 0 on success
+ */
+int pifacecad_enable_interrupts();
+
+/**
+ * Disables interrupts and exports to the GPIO connection from
+ * the PiFace Control and Display.
+ *
+ * Example:
+ *    pifacecad_disable_interrupts();
+ *
+ * @return int 0 on success
+ */
+int pifacecad_disable_interrupts();
+
+/**
+ * Waits for a change of any of the switches on the PiFace Control
+ * and Display and returns the current state of all switches as each
+ * bit of the 8-bit return value.
+ * Requires that interrupts are enabled with
+ * pifacecad_enable_interrupts() first
+ *
+ * Example:
+ *
+ *     pifacecad_open();
+ *     pifacecad_enable_interrupts();
+ *     uint8_t switches = pifacecad_wait_for_switch(0);
+ *     pifacecad_close();
+ *
+ * @param timeout Maximum ms to wait for switch press, -1 for forever
+ * @return uint8_t 8-bit switches state
+ */
+uint8_t pifacecad_wait_for_switch(int timeout);
+
+/**
  * Writes a message to the LCD screen starting from the current cursor
  * position. Accepts '\\n'. Returns the current cursor address.
  *

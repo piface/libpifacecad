@@ -11,6 +11,13 @@ static const int bus = 0, chip_select = 1, hw_addr = 0;
 static int mcp23s17_fd = 0; // MCP23S17 SPI file descriptor
 
 static const int SWITCH_PORT = GPIOA;
+/* LCD_PORT (GPIOB) looks like:
+ * +-----------+----+----+----+--------------------+--------+--------+--------+
+ * | 7         | 6  | 5  | 4  | 3                  | 2      | 1      | 0      |
+ * +-----------+----+----+----+--------------------+--------+--------+--------+
+ * | backlight | rs | rw | en | data 7 / busy flag | data 6 | data 5 | data 4 |
+ * +-----------+----+----+----+--------------------+--------+--------+--------+
+ */
 static const int LCD_PORT = GPIOB;
 
 // current lcd state
@@ -138,6 +145,31 @@ uint8_t pifacecad_read_switch(uint8_t switch_num)
     return (mcp23s17_read_reg(SWITCH_PORT,
                               hw_addr,
                               mcp23s17_fd) >> switch_num) & 1;
+}
+
+
+int pifacecad_enable_interrupts()
+{
+   return mcp23s17_enable_interrupts();
+}
+
+
+int pifacecad_disable_interrupts()
+{
+   return mcp23s17_disable_interrupts();
+}
+
+
+uint8_t pifacecad_wait_for_switch(int timeout)
+{
+    // Flush any pending interrupts prior to wait
+    mcp23s17_read_reg(INTCAPA, hw_addr, mcp23s17_fd);
+
+    // Wait for input state change
+    mcp23s17_wait_for_interrupt(timeout);
+
+    // Read & return input register, thus clearing interrupt
+    return mcp23s17_read_reg(INTCAPA, hw_addr, mcp23s17_fd);
 }
 
 
@@ -396,39 +428,46 @@ static uint8_t is_busy(void)
 
     // set RS=0, RW=1
     // 2 read, 2 write
-    pifacecad_lcd_set_rs(0);  // instruction register
-    pifacecad_lcd_set_rw(1);  // read
+    // pifacecad_lcd_set_rs(0);  // instruction register
+    // pifacecad_lcd_set_rw(1);  // read
 
     // 1 read, 1 write - this is faster
     // could do without read if I stored the backlight state locally
     // which is probably the right way of doing things
-    // uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
-    // reg &= 0xff ^ (1 << PIN_RS);  // clear RS
-    // reg |= 1 << PIN_RW;  // set RW
-    // // reg |= 1 << PIN_ENABLE;  // set ENABLE
-    // reg &= 0xf0;  // clear data
-    // mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
+    uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
+    reg &= 0xff ^ (1 << PIN_RS);  // clear RS
+    reg |= 1 << PIN_RW;  // set RW
+    reg &= 0xf0;  // clear data
+    mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
 
-    pifacecad_lcd_set_enable(1);
+    // pifacecad_lcd_set_enable(1);
+    reg |= 1 << PIN_ENABLE;  // set ENABLE
+    mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
     sleep_ns(DELAY_PULSE_NS);
 
     // read busy and three most significant bits of address counter
-    uint8_t reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
+    // Busy flag is bit 3
+    reg = mcp23s17_read_reg(LCD_PORT, hw_addr, mcp23s17_fd);
 
-    pifacecad_lcd_set_enable(0);
+    // pifacecad_lcd_set_enable(0);
+    reg &= 0xff ^ (1 << PIN_ENABLE);  // clear ENABLE
+    mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
     sleep_ns(DELAY_PULSE_NS);
 
     // lower nibble of address counter
-    pifacecad_lcd_set_enable(1);
+    // pifacecad_lcd_set_enable(1);
+    reg |= 1 << PIN_ENABLE;  // set ENABLE
+    mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
     sleep_ns(DELAY_PULSE_NS);
-    pifacecad_lcd_set_enable(0);
+    // pifacecad_lcd_set_enable(0);
+    // pifacecad_lcd_set_rw(0);
+    reg &= 0xff ^ (1 << PIN_ENABLE);  // clear ENABLE
+    reg &= 0xff ^ (1 << PIN_RW);  // clear RW
+    mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
     sleep_ns(DELAY_PULSE_NS);
 
-    pifacecad_lcd_set_rw(0);
-    // reg &= 0xff ^ (1 << PIN_RW);  // clear RW
-    // mcp23s17_write_reg(reg, LCD_PORT, hw_addr, mcp23s17_fd);
-
+    // set data lines to outputs again
     mcp23s17_write_reg(0x00, IODIRB, hw_addr, mcp23s17_fd);
 
-    return reg & 0x01;  // return the busy flag
+    return (reg & 0xf) >> 3;  // return the busy flag
 }

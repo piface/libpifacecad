@@ -43,7 +43,7 @@ int pifacecad_open(void)
     // Set IO config
     const uint8_t ioconfig = BANK_OFF | \
                              INT_MIRROR_OFF | \
-                             SEQOP_ON | \
+                             SEQOP_OFF | \
                              DISSLW_OFF | \
                              HAEN_ON | \
                              ODR_OFF | \
@@ -160,16 +160,37 @@ uint8_t pifacecad_lcd_get_cursor_address(void)
     return cur_address;
 }
 
+/********************************************************************
+ *  Modified 2014/06/26 John Wulff <immediatec@gmail.com>
+ *  2.6 ms delay after LCD_CLEARDISPLAY
+ *
+ *  Execution time of the "Clear display" command is not specified
+ *  in the HITACHI date sheet HD44780U, page 24. (Probably a misprint)
+ *  It was measured and found to be 1.6 to 2.4 ms +- 0.2 ms
+ *******************************************************************/
 
 void pifacecad_lcd_clear(void)
 {
     pifacecad_lcd_send_command(LCD_CLEARDISPLAY);
+    sleep_ns(DELAY_CLEAR_NS);		/* 2.6 ms  - added JW 2014/06/26 */
     cur_address = 0;
 }
+
+/********************************************************************
+ *  2.6 ms delay after LCD_RETURNHOME
+ *
+ *  Execution time of the "Return home" command is specified as 1.52 ms
+ *  in the HITACHI date sheet HD44780U, page 24. (Probably meant for
+ *  "Clear display")
+ *  It was measured and found to be less than 0.8 ms and is probably
+ *  37 us like all other commands.  To be safe the delay was added here
+ *  also as it hardly influences performance.
+ *******************************************************************/
 
 void pifacecad_lcd_home(void)
 {
     pifacecad_lcd_send_command(LCD_RETURNHOME);
+    sleep_ns(DELAY_CLEAR_NS);		/* 2.6 ms  - added JW 2014/06/26 */
     cur_address = 0;
 }
 

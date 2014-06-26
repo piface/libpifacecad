@@ -4,3 +4,10 @@ Change Log
 v0.1.0
 ------
 - Initial release.
+v0.2.0
+------
+- ???
+v0.2.1
+------
+- add 2.6 ms delay to piface_lcd_clear() and piface_lcd_home()
+- change SEQOP_ON to SEQOP_OFF in piface_open_noinit() jw 2014/06/26

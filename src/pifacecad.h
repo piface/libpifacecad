@@ -3,6 +3,7 @@
  * @brief A simple static library for controlling PiFace Control and Display.
  *
  * Copyright (C) 2013 Thomas Preston <thomas.preston@openlx.org.uk>
+ * Modified 2014/06/26 John Wulff <immediatec@gmail.com> 2.6 ms delay after LCD_CLEARDISPLAY
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@ extern "C" {
 
 #define DELAY_PULSE_NS 1000 // 1us
 #define DELAY_SETTLE_NS 40000 // 40us
+#define DELAY_CLEAR_NS 2600000L // 2.6ms
 #define DELAY_SETUP_0_NS 15000000L // 15ms
 #define DELAY_SETUP_1_NS 5000000L // 5ms
 #define DELAY_SETUP_2_NS 1000000L // 1ms

@@ -11,3 +11,28 @@ v0.2.1
 ------
 - add 2.6 ms delay to piface_lcd_clear() and piface_lcd_home()
 - change SEQOP_ON to SEQOP_OFF in piface_open_noinit() jw 2014/06/26
+------
+v0.2.2
+Date: 2018-02-08
+- pifacecad_lcd_right_to_left and pifacecad_lcd_autoscroll_off modified
+  cur_display_control instead of cur_entry_mode.
+
+- The descriptions of function in pifacecad.h had been copy and
+  pasted, but the function names was not updated in the examples.
+------
+v0.2.3
+Date: 2018-02-08
+- Added utility funcitons:
+  void pifacecad_lcd_display_control(uint8_t attr, uint8_t state);
+  void pifacecad_lcd_entry_mode(uint8_t attr, uint8_t state);
+
+- Added functions that take a parameter instead of having to call
+  two diffrerent functions for turning a thing on or off.
+
+  void pifacecad_lcd_display(uint8_t state)
+  void pifacecad_lcd_blink(uint8_t state)
+  void pifacecad_lcd_cursor(uint8_t state)
+  void pifacecad_lcd_autoscroll(uint8_t state)
+
+- Makefile distclean removes more files.
+------

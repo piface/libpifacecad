@@ -246,7 +246,7 @@ void pifacecad_lcd_display_off(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_on();
+ *     pifacecad_lcd_blink_on();
  *
  */
 void pifacecad_lcd_blink_on(void);
@@ -256,7 +256,7 @@ void pifacecad_lcd_blink_on(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_off();
+ *     pifacecad_lcd_blink_off();
  *
  */
 void pifacecad_lcd_blink_off(void);
@@ -266,7 +266,7 @@ void pifacecad_lcd_blink_off(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_on();
+ *     pifacecad_lcd_cursor_on();
  *
  */
 void pifacecad_lcd_cursor_on(void);
@@ -276,7 +276,7 @@ void pifacecad_lcd_cursor_on(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_off();
+ *     pifacecad_lcd_cursor_off();
  *
  */
 void pifacecad_lcd_cursor_off(void);
@@ -286,7 +286,7 @@ void pifacecad_lcd_cursor_off(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_on();
+ *     pifacecad_lcd_backlight_on();
  *
  */
 void pifacecad_lcd_backlight_on(void);
@@ -296,7 +296,7 @@ void pifacecad_lcd_backlight_on(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_off();
+ *     pifacecad_lcd_backlight_off();
  *
  */
 void pifacecad_lcd_backlight_off(void);

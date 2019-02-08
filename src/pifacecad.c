@@ -270,15 +270,15 @@ void pifacecad_lcd_right_to_left(void)
 // This will 'right justify' text from the cursor
 void pifacecad_lcd_autoscroll_on(void)
 {
-    cur_display_control |= LCD_ENTRYSHIFTINCREMENT;
-    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_display_control);
+    cur_entry_mode |= LCD_ENTRYSHIFTINCREMENT;
+    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
 }
 
 // This will 'left justify' text from the cursor
 void pifacecad_lcd_autoscroll_off(void)
 {
-    cur_display_control &= 0xff ^ LCD_ENTRYSHIFTINCREMENT;
-    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_display_control);
+    cur_entry_mode &= 0xff ^ LCD_ENTRYSHIFTINCREMENT;
+    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
 }
 
 void pifacecad_lcd_write_custom_bitmap(uint8_t location)

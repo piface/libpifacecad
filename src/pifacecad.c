@@ -194,41 +194,49 @@ void pifacecad_lcd_home(void)
     cur_address = 0;
 }
 
+void pifacecad_lcd_display(uint8_t state)
+{
+  pifacecad_lcd_display_control( LCD_DISPLAYON, state );
+}
 
 void pifacecad_lcd_display_on(void)
 {
-    cur_display_control |= LCD_DISPLAYON;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_display(1);
 }
 
 void pifacecad_lcd_display_off(void)
 {
-    cur_display_control &= 0xff ^ LCD_DISPLAYON;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_display(0);
+}
+
+void pifacecad_lcd_blink(uint8_t state)
+{
+  pifacecad_lcd_display_control( LCD_BLINKON, state );
 }
 
 void pifacecad_lcd_blink_on(void)
 {
-    cur_display_control |= LCD_BLINKON;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_blink(1);
 }
 
 void pifacecad_lcd_blink_off(void)
 {
-    cur_display_control &= 0xff ^ LCD_BLINKON;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_blink(0);
+}
+
+void pifacecad_lcd_cursor(uint8_t state)
+{
+  pifacecad_lcd_display_control( LCD_CURSORON, state );
 }
 
 void pifacecad_lcd_cursor_on(void)
 {
-    cur_display_control |= LCD_CURSORON;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_cursor(1);
 }
 
 void pifacecad_lcd_cursor_off(void)
 {
-    cur_display_control &= 0xff ^ LCD_CURSORON;
-    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+    pifacecad_lcd_cursor(0);
 }
 
 void pifacecad_lcd_backlight_on(void)
@@ -257,28 +265,29 @@ void pifacecad_lcd_move_right(void)
 
 void pifacecad_lcd_left_to_right(void)
 {
-    cur_entry_mode |= LCD_ENTRYLEFT;
-    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    pifacecad_lcd_entry_mode( LCD_ENTRYLEFT, 1 );
 }
 
 void pifacecad_lcd_right_to_left(void)
 {
-    cur_entry_mode &= 0xff ^ LCD_ENTRYLEFT;
-    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    pifacecad_lcd_entry_mode( LCD_ENTRYLEFT, 0 );
+}
+
+void pifacecad_lcd_autoscroll(uint8_t state)
+{
+    pifacecad_lcd_entry_mode( LCD_ENTRYSHIFTINCREMENT, state );
 }
 
 // This will 'right justify' text from the cursor
 void pifacecad_lcd_autoscroll_on(void)
 {
-    cur_entry_mode |= LCD_ENTRYSHIFTINCREMENT;
-    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    pifacecad_lcd_autoscroll(1);
 }
 
 // This will 'left justify' text from the cursor
 void pifacecad_lcd_autoscroll_off(void)
 {
-    cur_entry_mode &= 0xff ^ LCD_ENTRYSHIFTINCREMENT;
-    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
+    pifacecad_lcd_autoscroll(0);
 }
 
 void pifacecad_lcd_write_custom_bitmap(uint8_t location)
@@ -296,6 +305,24 @@ void pifacecad_lcd_store_custom_bitmap(uint8_t location, uint8_t bitmap[])
     for (i = 0; i < 8; i++) {
         pifacecad_lcd_send_data(bitmap[i]);
     }
+}
+
+void pifacecad_lcd_display_control(uint8_t attr, uint8_t state)
+{
+    if ( state )
+      cur_display_control |= attr;
+    else
+      cur_display_control &= 0xff ^ attr;
+    pifacecad_lcd_send_command(LCD_DISPLAYCONTROL | cur_display_control);
+}
+
+void pifacecad_lcd_entry_mode(uint8_t attr, uint8_t state)
+{
+    if ( state )
+      cur_entry_mode |= attr;
+    else
+      cur_entry_mode &= 0xff ^ attr;
+    pifacecad_lcd_send_command(LCD_ENTRYMODESET | cur_entry_mode);
 }
 
 void pifacecad_lcd_send_command(uint8_t command)

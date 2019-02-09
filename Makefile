@@ -38,7 +38,7 @@ $(BINARY): $(OBJECTS)
 	$(CC) $(INCFLAGS) $(CFLAGS) -fPIC $< -o $@
 
 distclean: clean
-	rm -f $(BINARY)
+	rm -f $(BINARY) example test
 
 clean:
 	rm -f $(OBJECTS)

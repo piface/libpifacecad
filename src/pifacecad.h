@@ -88,7 +88,7 @@ extern "C" {
 #define LCD_WIDTH 16
 #define LCD_RAM_WIDTH 80 // RAM is 80 wide, split over two lines
 
-static const uint8_t ROW_OFFSETS[] = {0, 0x40};
+static const uint8_t ROW_OFFSETS[] = {0, 40}; // Second row is at decimal 40.
 
 /**
  * Opens and initialises a PiFace Control and Display.
@@ -222,6 +222,16 @@ void pifacecad_lcd_clear(void);
 void pifacecad_lcd_home(void);
 
 /**
+ * Turns the display on or off.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_display(1);
+ *
+ */
+void pifacecad_lcd_display(uint8_t state);
+
+/**
  * Turns the display on.
  *
  * Example:
@@ -242,11 +252,21 @@ void pifacecad_lcd_display_on(void);
 void pifacecad_lcd_display_off(void);
 
 /**
+ * Turns the blinking cursor on or off.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_blink(1);
+ *
+ */
+void pifacecad_lcd_blink(uint8_t state);
+
+/**
  * Turns the blink on.
  *
  * Example:
  *
- *     pifacecad_lcd_display_on();
+ *     pifacecad_lcd_blink_on();
  *
  */
 void pifacecad_lcd_blink_on(void);
@@ -256,17 +276,27 @@ void pifacecad_lcd_blink_on(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_off();
+ *     pifacecad_lcd_blink_off();
  *
  */
 void pifacecad_lcd_blink_off(void);
+
+/**
+ * Turns the underline cursor on or off
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_cursor(1);
+ *
+ */
+void pifacecad_lcd_cursor(uint8_t state);
 
 /**
  * Turns the cursor on.
  *
  * Example:
  *
- *     pifacecad_lcd_display_on();
+ *     pifacecad_lcd_cursor_on();
  *
  */
 void pifacecad_lcd_cursor_on(void);
@@ -276,7 +306,7 @@ void pifacecad_lcd_cursor_on(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_off();
+ *     pifacecad_lcd_cursor_off();
  *
  */
 void pifacecad_lcd_cursor_off(void);
@@ -286,7 +316,7 @@ void pifacecad_lcd_cursor_off(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_on();
+ *     pifacecad_lcd_backlight_on();
  *
  */
 void pifacecad_lcd_backlight_on(void);
@@ -296,7 +326,7 @@ void pifacecad_lcd_backlight_on(void);
  *
  * Example:
  *
- *     pifacecad_lcd_display_off();
+ *     pifacecad_lcd_backlight_off();
  *
  */
 void pifacecad_lcd_backlight_off(void);
@@ -342,6 +372,16 @@ void pifacecad_lcd_left_to_right(void);
  *
  */
 void pifacecad_lcd_right_to_left(void);
+
+/**
+ * The screen will follow text if it moves out of view.
+ *
+ * Example:
+ *
+ *     pifacecad_lcd_autoscroll(1);
+ *
+ */
+void pifacecad_lcd_autoscroll(uint8_t state);
 
 /**
  * The screen will follow text if it moves out of view.
@@ -498,6 +538,9 @@ uint8_t address2row(uint8_t address);
 
 // int pifacecad_lcd_set_viewport_corner(int col);
 // int pifacecad_lcd_see_cursor(int col);
+
+void pifacecad_lcd_display_control(uint8_t attr, uint8_t state);
+void pifacecad_lcd_entry_mode(uint8_t attr, uint8_t state);
 
 #ifdef __cplusplus
 }
